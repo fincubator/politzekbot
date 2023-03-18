@@ -21,7 +21,36 @@ dp = Dispatcher()
 
 @dp.message(Command("start"))
 async def cmd_start(message: types.Message):
-    await message.answer(RU.RuStartPhrases)
+    kb = [
+        [
+            types.KeyboardButton(text="📜 Статистика"),
+            types.KeyboardButton(text="🎲 Случайный"),
+            types.KeyboardButton(text="🏠 Города"),
+            types.KeyboardButton(text="🔍"),
+            types.KeyboardButton(text="🏻 Что писать?")
+
+        ],
+    ]
+    keyboard = types.ReplyKeyboardMarkup(
+        keyboard=kb,
+        resize_keyboard=True,
+    )
+    await message.answer(RU.RuStartPhrases, reply_markup=keyboard)
+
+@dp.message(Command("write"))
+async def what_whrite(message: types.Message):
+    kb = [
+        [
+            types.KeyboardButton(text="🏘 Домой")
+
+        ],
+    ]
+    keyboard = types.ReplyKeyboardMarkup(
+        keyboard=kb,
+        resize_keyboard=True,
+    )
+
+    await message.answer(RU.RuWhatToWrite, reply_markup=keyboard)
 
 
 async def main():
