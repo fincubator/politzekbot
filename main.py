@@ -8,7 +8,7 @@ import toml
 import logging
 import asyncio
 
-# TODO add languages chosing
+# TODO add languages choosing
 import languageRU as RU
 import languageEN
 import languagePL
@@ -99,6 +99,26 @@ async def find(message: types.Message, state: FSMContext):
 
     await message.answer(
         text=RU.RuFind,
+        reply_markup=keyboard
+    )
+    await state.set_state(Finder.input_data)
+
+@dp.message(Command("city"))
+@dp.message(Text("🏠 Города"))
+async  def city(message: types.Message, state: FSMContext):
+    kb = [
+        [
+            types.KeyboardButton(text="🏘 Домой")
+
+        ],
+    ]
+    keyboard = types.ReplyKeyboardMarkup(
+        keyboard=kb,
+        resize_keyboard=True,
+    )
+
+    await message.answer(
+        text=RU.RuCity,
         reply_markup=keyboard
     )
     await state.set_state(Finder.input_data)
