@@ -15,5 +15,5 @@
 ####Phrases
 
 #First phrase on start
-RuStartPhrases = 'Привет'
+RuStartPhrases = ''
 

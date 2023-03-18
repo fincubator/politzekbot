@@ -3,7 +3,7 @@
 import logging
 
 #Import diffrent custom modules 
-import config
+import toml
 import languageRU
 import languageEN
 import languagePL
@@ -18,6 +18,9 @@ from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemo
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.dispatcher.filters import Text
 
+
+with open('secrets.toml') as f:
+    key=toml.parse(f.read())
 
 
 ########################### Bot configruration ################################
