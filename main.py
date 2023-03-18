@@ -5,6 +5,7 @@ import toml
 import logging
 import asyncio
 
+# TODO add languages chosing
 import languageRU as RU
 import languageEN
 import languagePL
@@ -12,7 +13,6 @@ import languageBY
 
 with open('secrets.toml') as f:
     key = toml.loads(f.read())["key"]
-
 
 logging.basicConfig(level=logging.INFO)
 
@@ -25,6 +25,7 @@ dp = Dispatcher()
 async def cmd_start(message: types.Message):
     kb = [
         [
+            # TODO add buttons formatting
             types.KeyboardButton(text="📜 Статистика"),
             types.KeyboardButton(text="🎲 Случайный"),
             types.KeyboardButton(text="🏠 Города"),
@@ -39,8 +40,10 @@ async def cmd_start(message: types.Message):
     )
     await message.answer(RU.RuStartPhrases, reply_markup=keyboard)
 
+
 @dp.message(Command("write"))
-async def what_whrite(message: types.Message):
+@dp.message(Text("🏻 Что писать?"))
+async def what_write(message: types.Message):
     kb = [
         [
             types.KeyboardButton(text="🏘 Домой")
@@ -52,7 +55,24 @@ async def what_whrite(message: types.Message):
         resize_keyboard=True,
     )
 
-    await message.answer(RU.RuWhatToWrite, reply_markup=keyboard)
+    await message.reply(RU.RuWhatToWrite, reply_markup=keyboard)
+
+
+@dp.message(Command("stats"))
+@dp.message(Text("📜 Статистика"))
+async def stats(message: types.Message):
+    kb = [
+        [
+            types.KeyboardButton(text="🏘 Домой")
+
+        ],
+    ]
+    keyboard = types.ReplyKeyboardMarkup(
+        keyboard=kb,
+        resize_keyboard=True,
+    )
+
+    await message.reply(RU.RUStats, reply_markup=keyboard,  parse_mode="MarkdownV2")
 
 
 async def main():
@@ -61,4 +81,3 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
-
