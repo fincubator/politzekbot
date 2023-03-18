@@ -1,6 +1,9 @@
 from aiogram import Bot, Dispatcher, types
 from aiogram.filters import Text
 from aiogram.filters.command import Command
+from aiogram.fsm.context import FSMContext
+from aiogram.fsm.state import StatesGroup, State
+
 import toml
 import logging
 import asyncio
@@ -10,6 +13,11 @@ import languageRU as RU
 import languageEN
 import languagePL
 import languageBY
+
+
+class Finder(StatesGroup):
+    input_data = State()
+
 
 with open('secrets.toml') as f:
     key = toml.loads(f.read())["key"]
@@ -72,10 +80,32 @@ async def stats(message: types.Message):
         resize_keyboard=True,
     )
 
-    await message.reply(RU.RUStats, reply_markup=keyboard,  parse_mode="MarkdownV2")
+    await message.answer(RU.RUStats, reply_markup=keyboard, parse_mode="MarkdownV2")
+
+
+@dp.message(Command("find"))
+@dp.message(Text("🔍"))
+async def find(message: types.Message, state: FSMContext):
+    kb = [
+        [
+            types.KeyboardButton(text="🏘 Домой")
+
+        ],
+    ]
+    keyboard = types.ReplyKeyboardMarkup(
+        keyboard=kb,
+        resize_keyboard=True,
+    )
+
+    await message.answer(
+        text=RU.RuFind,
+        reply_markup=keyboard
+    )
+    await state.set_state(Finder.input_data)
 
 
 async def main():
+    await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot)
 
 
