@@ -1,4 +1,5 @@
 from aiogram import Bot, Dispatcher, types
+from aiogram.filters import Text
 from aiogram.filters.command import Command
 import toml
 import logging
@@ -20,6 +21,7 @@ dp = Dispatcher()
 
 
 @dp.message(Command("start"))
+@dp.message(Text("🏘 Домой"))
 async def cmd_start(message: types.Message):
     kb = [
         [
