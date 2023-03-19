@@ -1,9 +1,3 @@
-from aiogram import Bot, Dispatcher, types
-from aiogram.filters import Text
-from aiogram.filters.command import Command
-from aiogram.fsm.context import FSMContext
-from aiogram.fsm.state import StatesGroup, State
-
 import toml
 import logging
 import asyncio
@@ -16,14 +10,16 @@ import languagePL
 import languageBY
 from Database import Database
 
-#Import modules for Aiogram
+# Import modules for Aiogram
 from aiogram import Bot, Dispatcher, executor, types
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.types.message import ContentType
-from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove, InlineKeyboardButton, WebAppInfo, InlineKeyboardMarkup
+from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove, InlineKeyboardButton, WebAppInfo, \
+    InlineKeyboardMarkup
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
-from aiogram.dispatcher.filters import Text
+from aiogram.dispatcher.filters import Text, Command
+
 
 class Finder(StatesGroup):
     input_data = State()
@@ -36,12 +32,12 @@ with open('secrets.toml', "r") as f:
 logging.basicConfig(level=logging.INFO)
 
 bot = Bot(token=key)
-dp = Dispatcher()
+dp = Dispatcher(bot)
 database = Database(config["api_key"], config["base_id"])
 
 
-@dp.message(Command("start"))
-@dp.message(Text("🏘 Домой"))
+@dp.message_handler(Command("start"))
+@dp.message_handler(Text("🏘 Домой"))
 async def cmd_start(message: types.Message):
     kb = [
         [
@@ -50,8 +46,8 @@ async def cmd_start(message: types.Message):
             types.KeyboardButton(text="🎲 Случайный"),
             types.KeyboardButton(text="🏠 Города"),
             types.KeyboardButton(text="🔍"),
-            types.KeyboardButton(text="🏻 Что писать?")
-
+            types.KeyboardButton(text="🏻 Что писать?"),
+            types.KeyboardButton(text="Задонатить")
         ],
     ]
     keyboard = types.ReplyKeyboardMarkup(
@@ -61,43 +57,43 @@ async def cmd_start(message: types.Message):
 
     await message.answer(RU.RuStartPhrases, reply_markup=keyboard)
 
-#choose currency keyboard
+
+# choose currency keyboard
 b1_RU = KeyboardButton(languageRU.bt_1_kw_wal)
 b2_RU = KeyboardButton(languageRU.bt_2_kw_wal)
 b3_RU = KeyboardButton(languageRU.bt_3_kw_wal)
 b4_RU = KeyboardButton(languageRU.bt_4_kw_wal)
-currency_keybord = ReplyKeyboardMarkup(resize_keyboard=True) #one_time_keyboard=True чтоб прятать клавиатуру
+currency_keybord = ReplyKeyboardMarkup(resize_keyboard=True)  # one_time_keyboard=True чтоб прятать клавиатуру
 currency_keybord.add(b1_RU).insert(b2_RU).add(b4_RU).insert(b3_RU)
-
 
 b1_RU = KeyboardButton(languageRU.bt_1_kw_wal_EU)
 b2_RU = KeyboardButton(languageRU.bt_2_kw_wal_EU)
 b3_RU = KeyboardButton(languageRU.bt_3_kw_wal_EU)
 b4_RU = KeyboardButton(languageRU.bt_4_kw_wal_EU)
-currency_keybord_EU = ReplyKeyboardMarkup(resize_keyboard=True) #one_time_keyboard=True чтоб прятать клавиатуру
+currency_keybord_EU = ReplyKeyboardMarkup(resize_keyboard=True)  # one_time_keyboard=True чтоб прятать клавиатуру
 currency_keybord_EU.add(b1_RU).insert(b2_RU).add(b4_RU).insert(b3_RU)
-
 
 b1_RU = KeyboardButton(languageRU.bt_1_kw_wal_US)
 b2_RU = KeyboardButton(languageRU.bt_2_kw_wal_US)
 b3_RU = KeyboardButton(languageRU.bt_3_kw_wal_US)
 b4_RU = KeyboardButton(languageRU.bt_4_kw_wal_US)
-currency_keybord_US = ReplyKeyboardMarkup(resize_keyboard=True) #one_time_keyboard=True чтоб прятать клавиатуру
+currency_keybord_US = ReplyKeyboardMarkup(resize_keyboard=True)  # one_time_keyboard=True чтоб прятать клавиатуру
 currency_keybord_US.add(b1_RU).insert(b2_RU).add(b4_RU).insert(b3_RU)
 
 b1_RU = KeyboardButton(languageRU.bt_1_kw_wal_PL)
 b2_RU = KeyboardButton(languageRU.bt_2_kw_wal_PL)
 b3_RU = KeyboardButton(languageRU.bt_3_kw_wal_PL)
 b4_RU = KeyboardButton(languageRU.bt_4_kw_wal_PL)
-currency_keybord_PL = ReplyKeyboardMarkup(resize_keyboard=True) #one_time_keyboard=True чтоб прятать клавиатуру
+currency_keybord_PL = ReplyKeyboardMarkup(resize_keyboard=True)  # one_time_keyboard=True чтоб прятать клавиатуру
 currency_keybord_PL.add(b1_RU).insert(b2_RU).add(b4_RU).insert(b3_RU)
 
 b1_RU = KeyboardButton(languageRU.bt_4_kw_wal)
-currency_keybord_back = ReplyKeyboardMarkup(resize_keyboard=True) #one_time_keyboard=True чтоб прятать клавиатуру
+currency_keybord_back = ReplyKeyboardMarkup(resize_keyboard=True)  # one_time_keyboard=True чтоб прятать клавиатуру
 currency_keybord_back.add(b1_RU)
 
-@dp.message(Command("write"))
-@dp.message(Text("🏻 Что писать?"))
+
+@dp.message_handler(Command("write"))
+@dp.message_handler(Text("🏻 Что писать?"))
 async def what_write(message: types.Message):
     kb = [
         [
@@ -114,8 +110,8 @@ async def what_write(message: types.Message):
                         reply_markup=keyboard)
 
 
-@dp.message(Command("stats"))
-@dp.message(Text("📜 Статистика"))
+@dp.message_handler(Command("stats"))
+@dp.message_handler(Text("📜 Статистика"))
 async def stats(message: types.Message):
     kb = [
         [
@@ -136,36 +132,49 @@ async def stats(message: types.Message):
                                                for i in
                                                answer["less_friends"]]),
                          reply_markup=keyboard, parse_mode="MarkdownV2")
+
+
 @dp.message_handler(Text(equals=languageRU.bt_4_kw_wal, ignore_case=True))
-async def lests_go(message : types.Message):
-    await bot.send_message(message.from_user.id, languageRU.go_back_to_main_menu, reply_markup=currency_keybord, parse_mode="Markdown")
+async def lests_go(message: types.Message):
+    await bot.send_message(message.from_user.id, languageRU.go_back_to_main_menu, reply_markup=currency_keybord,
+                           parse_mode="Markdown")
 
-#Go back
+
+# Go back
 @dp.message_handler(Text(equals=languageRU.bt_4_kw_wal_EU, ignore_case=True))
-async def lests_go(message : types.Message):
-    await bot.send_message(message.from_user.id, languageRU.go_back_to_main_menu, reply_markup=currency_keybord, parse_mode="Markdown")
+async def lests_go(message: types.Message):
+    await bot.send_message(message.from_user.id, languageRU.go_back_to_main_menu, reply_markup=currency_keybord,
+                           parse_mode="Markdown")
 
-#EU
+
+# EU
 @dp.message_handler(Text(equals=languageRU.bt_1_kw_wal, ignore_case=True))
-async def lests_go(message : types.Message):
-    await bot.send_message(message.from_user.id, languageRU.how_much_money, reply_markup=currency_keybord_EU, parse_mode="Markdown")
+async def lests_go(message: types.Message):
+    await bot.send_message(message.from_user.id, languageRU.how_much_money, reply_markup=currency_keybord_EU,
+                           parse_mode="Markdown")
 
-#US
+
+# US
 @dp.message_handler(Text(equals=languageRU.bt_2_kw_wal, ignore_case=True))
-async def lests_go(message : types.Message):
-    await bot.send_message(message.from_user.id, languageRU.how_much_money, reply_markup=currency_keybord_US, parse_mode="Markdown")
+async def lests_go(message: types.Message):
+    await bot.send_message(message.from_user.id, languageRU.how_much_money, reply_markup=currency_keybord_US,
+                           parse_mode="Markdown")
 
-#PL
+
+# PL
 @dp.message_handler(Text(equals=languageRU.bt_3_kw_wal, ignore_case=True))
-async def lests_go(message : types.Message):
-    await bot.send_message(message.from_user.id, languageRU.how_much_money, reply_markup=currency_keybord_PL, parse_mode="Markdown")
+async def lests_go(message: types.Message):
+    await bot.send_message(message.from_user.id, languageRU.how_much_money, reply_markup=currency_keybord_PL,
+                           parse_mode="Markdown")
 
-@dp.message_handler(commands=['start', 'help'])
-async def start_pay(message : types.Message):
-    await bot.send_message(message.from_user.id, languageRU.RuFirstFraze, parse_mode="Markdown") 
 
-@dp.message(Command("find"))
-@dp.message(Text("🔍"))
+@dp.message_handler(Text("Задонатить"))
+async def start_pay(message: types.Message):
+    await bot.send_message(message.from_user.id, languageRU.RuFirstFraze, parse_mode="Markdown")
+
+
+@dp.message_handler(Command("find"))
+@dp.message_handler(Text("🔍"))
 async def find(message: types.Message, state: FSMContext):
     kb = [
         [
@@ -184,8 +193,8 @@ async def find(message: types.Message, state: FSMContext):
     await state.set_state(Finder.input_data)
 
 
-@dp.message(Command("city"))
-@dp.message(Text("🏠 Города"))
+@dp.message_handler(Command("city"))
+@dp.message_handler(Text("🏠 Города"))
 async def city(message: types.Message, state: FSMContext):
     kb = [
         [
@@ -289,10 +298,8 @@ async def successful_payment(message: types.Message, state: FSMContext):
         print(f"{k} = {v}")
 
 
-
-
 ###################################################### Start bot ##################################################
 
-#run long polling
+# run long polling
 if __name__ == "__main__":
     asyncio.run(main())
