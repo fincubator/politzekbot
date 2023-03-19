@@ -13,19 +13,22 @@ import languageRU as RU
 import languageEN
 import languagePL
 import languageBY
+from Database import Database
 
 
 class Finder(StatesGroup):
     input_data = State()
 
 
-with open('secrets.toml') as f:
-    key = toml.loads(f.read())["key"]
+with open('secrets.toml', "r") as f:
+    config = toml.loads(f.read())
+    key = config["key"]
 
 logging.basicConfig(level=logging.INFO)
 
 bot = Bot(token=key)
 dp = Dispatcher()
+database = Database(config["api_key"], config["base_id"])
 
 
 @dp.message(Command("start"))
@@ -46,6 +49,7 @@ async def cmd_start(message: types.Message):
         keyboard=kb,
         resize_keyboard=True,
     )
+
     await message.answer(RU.RuStartPhrases, reply_markup=keyboard)
 
 
@@ -63,7 +67,8 @@ async def what_write(message: types.Message):
         resize_keyboard=True,
     )
 
-    await message.reply(RU.RuWhatToWrite, reply_markup=keyboard)
+    await message.reply(RU.RuWhatToWrite,
+                        reply_markup=keyboard)
 
 
 @dp.message(Command("stats"))
@@ -79,8 +84,16 @@ async def stats(message: types.Message):
         keyboard=kb,
         resize_keyboard=True,
     )
-
-    await message.answer(RU.RUStats, reply_markup=keyboard, parse_mode="MarkdownV2")
+    await message.answer("Секундочку, сейчас посчитаем",
+                         reply_markup=keyboard, parse_mode="MarkdownV2")
+    answer = database.statistic()
+    print(len(answer["less_friends"]))
+    await message.answer(RU.RUStats.format(answer["prisoners_count"], answer["friends_count"], answer["tasks"],
+                                           *[
+                                               f"{len(i['fields']['userToPrisoner']) if 'userToPrisoner' in i['fields'] else 0} друзей {i['fields']['name']} /info@{i['fields']['shortName']}"
+                                               for i in
+                                               answer["less_friends"]]),
+                         reply_markup=keyboard, parse_mode="MarkdownV2")
 
 
 @dp.message(Command("find"))
@@ -103,9 +116,10 @@ async def find(message: types.Message, state: FSMContext):
     )
     await state.set_state(Finder.input_data)
 
+
 @dp.message(Command("city"))
 @dp.message(Text("🏠 Города"))
-async  def city(message: types.Message, state: FSMContext):
+async def city(message: types.Message, state: FSMContext):
     kb = [
         [
             types.KeyboardButton(text="🏘 Домой")
@@ -116,6 +130,10 @@ async  def city(message: types.Message, state: FSMContext):
         keyboard=kb,
         resize_keyboard=True,
     )
+
+    prisoners_to_city = database.get_prisoners_by_city()
+
+
 
     await message.answer(
         text=RU.RuCity,

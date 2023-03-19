@@ -12,9 +12,14 @@ class Database:
         """
         :return: dict of statistic data
         """
-        return {"prisoners_count": len(self.__base.all("prisoners")),
+        all_prisoners = sorted(self.__base.all("prisoners"),
+                               key=lambda x: len(x["fields"]["userToPrisoner"]) if "userToPrisoner" in x[
+                                   "fields"] else 0)
+
+        return {"prisoners_count": len(all_prisoners),
                 "friends_count": len(self.__base.all("users")),
-                "tasks": len(self.__base.all("tasks"))}
+                "tasks": len(self.__base.all("tasks")),
+                "less_friends": all_prisoners[:3]}
 
     def get_random_prisoner(self) -> dict:
         data = self.__base.all("prisoners")
@@ -52,10 +57,16 @@ class Database:
                 answer.append(i)
         return answer
 
+    def get_page(self, nick):
+        data = self.__base.all("prisoners")
+        for i in data:
+            if "shortName" in data[i]["fields"] and nick in data[i]["fields"]["shortName"]:
+                return i
+
 
 if __name__ == "__main__":
     import toml
 
     config = toml.load("secrets.toml")
     db = Database(config["api_key"], config["base_id"])
-    print(db.find_prisoner("Минск"))
+    print(db.statistic())
