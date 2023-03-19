@@ -1,4 +1,5 @@
 from pyairtable import Table, Base
+import random
 
 
 class Database:
@@ -9,12 +10,47 @@ class Database:
 
     def statistic(self) -> dict:
         """
-
-        :return: dict of
+        :return: dict of statistic data
         """
         return {"prisoners_count": len(self.__base.all("prisoners")),
                 "friends_count": len(self.__base.all("users")),
                 "tasks": len(self.__base.all("tasks"))}
+
+    def get_random_prisoner(self) -> dict:
+        data = self.__base.all("prisoners")
+        return data[random.randint(0, len(data))]
+
+    def get_prisoners_by_city(self) -> dict:
+        data = self.__base.all("prisoners")
+        city_base = self.__base.all("city")
+        cities = {i["fields"]["city"][0] if "city" in i["fields"] else "None" for i in data}
+        id_to_name = dict()
+        for i in cities:  # need refactoring
+            for j in city_base:
+                if j["id"] == i:
+                    id_to_name[i] = j["fields"]["name"]
+                    break
+        city_prisoners = dict()
+        city_prisoners["None"] = list()
+        for i in data:
+            if "city" in i["fields"]:
+                if id_to_name[i["fields"]["city"][0]] in city_prisoners:
+                    city_prisoners[id_to_name[i["fields"]["city"][0]]].append(i)
+                else:
+                    city_prisoners[id_to_name[i["fields"]["city"][0]]] = [i, ]
+            else:
+                city_prisoners["None"].append(i)
+        return city_prisoners
+
+    def find_prisoner(self, string):
+        data = self.__base.all("prisoners")
+        answer = []
+        for i in data:
+            if "name" in i["fields"] and string.lower() in i["fields"]["name"].lower():
+                answer.append(i)
+            if "prison" in i["fields"] and string.lower() in i["fields"]["prison"][0].lower():
+                answer.append(i)
+        return answer
 
 
 if __name__ == "__main__":
@@ -22,4 +58,4 @@ if __name__ == "__main__":
 
     config = toml.load("secrets.toml")
     db = Database(config["api_key"], config["base_id"])
-    print(db.statistic())
+    print(db.find_prisoner("Минск"))
