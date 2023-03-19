@@ -1,0 +1,4 @@
+aiogram==3.0.0b7
+toml==0.10.2
+
+pyairtable~=1.4.0
