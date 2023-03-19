@@ -87,7 +87,6 @@ async def stats(message: types.Message):
     await message.answer("Секундочку, сейчас посчитаем",
                          reply_markup=keyboard, parse_mode="MarkdownV2")
     answer = database.statistic()
-    print(len(answer["less_friends"]))
     await message.answer(RU.RUStats.format(answer["prisoners_count"], answer["friends_count"], answer["tasks"],
                                            *[
                                                f"{len(i['fields']['userToPrisoner']) if 'userToPrisoner' in i['fields'] else 0} друзей {i['fields']['name']} /info@{i['fields']['shortName']}"
@@ -109,7 +108,6 @@ async def find(message: types.Message, state: FSMContext):
         keyboard=kb,
         resize_keyboard=True,
     )
-
     await message.answer(
         text=RU.RuFind,
         reply_markup=keyboard
@@ -130,11 +128,7 @@ async def city(message: types.Message, state: FSMContext):
         keyboard=kb,
         resize_keyboard=True,
     )
-
     prisoners_to_city = database.get_prisoners_by_city()
-
-
-
     await message.answer(
         text=RU.RuCity,
         reply_markup=keyboard
