@@ -1,6 +1,7 @@
 import toml
 import logging
 import asyncio
+import config
 
 # TODO add languages choosing
 import languageRU as RU
@@ -36,27 +37,15 @@ dp = Dispatcher(bot)
 database = Database(config["api_key"], config["base_id"])
 
 
-@dp.message_handler(Command("start"))
-@dp.message_handler(Text("🏘 Домой"))
-async def cmd_start(message: types.Message):
-    kb = [
-        [
-            # TODO add buttons formatting
-            types.KeyboardButton(text="📜 Статистика"),
-            types.KeyboardButton(text="🎲 Случайный"),
-            types.KeyboardButton(text="🏠 Города"),
-            types.KeyboardButton(text="🔍"),
-            types.KeyboardButton(text="🏻 Что писать?"),
-            types.KeyboardButton(text="Задонатить")
-        ],
-    ]
-    keyboard = types.ReplyKeyboardMarkup(
-        keyboard=kb,
-        resize_keyboard=True,
-    )
-
-    await message.answer(RU.RuStartPhrases, reply_markup=keyboard)
-
+# main keyboard
+b1_RU = KeyboardButton(languageRU.bt_1_kw_main)
+b2_RU = KeyboardButton(languageRU.bt_2_kw_main)
+b3_RU = KeyboardButton(languageRU.bt_3_kw_main)
+b4_RU = KeyboardButton(languageRU.bt_4_kw_main)
+b5_RU = KeyboardButton(languageRU.bt_5_kw_main)
+b6_RU = KeyboardButton(languageRU.bt_6_kw_main)
+main_keybord = ReplyKeyboardMarkup(resize_keyboard=True)  # one_time_keyboard=True чтоб прятать клавиатуру
+main_keybord.add(b1_RU).insert(b2_RU).add(b3_RU).insert(b5_RU).add(b4_RU).insert(b6_RU)
 
 # choose currency keyboard
 b1_RU = KeyboardButton(languageRU.bt_1_kw_wal)
@@ -92,6 +81,29 @@ currency_keybord_back = ReplyKeyboardMarkup(resize_keyboard=True)  # one_time_ke
 currency_keybord_back.add(b1_RU)
 
 
+
+@dp.message_handler(Command("start"))
+@dp.message_handler(Text('Вернись в начало \U0001F463'))
+@dp.message_handler(Text("🏘 Домой"))
+async def cmd_start(message: types.Message):
+    # kb = [
+    #     [
+    #         # TODO add buttons formatting
+    #         types.KeyboardButton(text="📜 Статистика"),
+    #         types.KeyboardButton(text="🎲 Случайный"),
+    #         types.KeyboardButton(text="🏠 Города"),
+    #         types.KeyboardButton(text="🔍"),
+    #         types.KeyboardButton(text="🏻 Что писать?"),
+    #         types.KeyboardButton(text="Донаты 🎩")
+    #     ],
+    # ]
+    # keyboard = types.ReplyKeyboardMarkup(
+    #     keyboard=kb,
+    #     resize_keyboard=True,
+    # )
+
+    await message.answer(RU.RuStartPhrases, reply_markup=main_keybord, parse_mode="Markdown")
+
 @dp.message_handler(Command("write"))
 @dp.message_handler(Text("🏻 Что писать?"))
 async def what_write(message: types.Message):
@@ -107,7 +119,7 @@ async def what_write(message: types.Message):
     )
 
     await message.reply(RU.RuWhatToWrite,
-                        reply_markup=keyboard)
+                        reply_markup=keyboard, parse_mode="Markdown")
 
 
 @dp.message_handler(Command("stats"))
@@ -168,13 +180,13 @@ async def lests_go(message: types.Message):
                            parse_mode="Markdown")
 
 
-@dp.message_handler(Text("Задонатить"))
+@dp.message_handler(Text("🎩 Донаты"))
 async def start_pay(message: types.Message):
-    await bot.send_message(message.from_user.id, languageRU.RuFirstFraze, parse_mode="Markdown")
+    await bot.send_message(message.from_user.id, languageRU.give_us_money, reply_markup=currency_keybord,  parse_mode="Markdown")
 
 
 @dp.message_handler(Command("find"))
-@dp.message_handler(Text("🔍"))
+@dp.message_handler(Text("🔍 Поиск"))
 async def find(message: types.Message, state: FSMContext):
     kb = [
         [
@@ -229,11 +241,11 @@ async def main():
 @dp.message_handler(Text(equals=languageRU.bt_2_kw_wal_PL, ignore_case=True), state='*')
 @dp.message_handler(Text(equals=languageRU.bt_3_kw_wal_PL, ignore_case=True), state='*')
 async def buy(message: types.Message, state: FSMContext):
-    PAYMENT_TOKEN = ''
-    if config.PAYMENTS_TOKEN_STRIPE_TEST.split(':')[1] == 'TEST':
+    PAYMENT_TOKEN = config["patment_stripe_token"]
+    if PAYMENT_TOKEN.split(':')[1] == 'TEST':
         await bot.send_message(message.chat.id, languageRU.info_for_users, reply_markup=currency_keybord_back,
                                parse_mode="Markdown")
-        PAYMENT_TOKEN = config.PAYMENTS_TOKEN_STRIPE_TEST
+        PAYMENT_TOKEN = PAYMENT_TOKEN
 
     # Define image
     PHOTO_URL = 'https://focus.ua/static/storage/originals/8/52/65cda35bcf74cf80f0f0384bdf483528.jpg'
@@ -296,10 +308,13 @@ async def successful_payment(message: types.Message, state: FSMContext):
     payment_info = message.successful_payment.to_python()
     for k, v in payment_info.items():
         print(f"{k} = {v}")
+    await bot.send_message(message.from_user.id, languageRU.info_thanks, reply_markup=main_keybord,
+                           parse_mode="Markdown")
+    
 
 
 ###################################################### Start bot ##################################################
 
 # run long polling
 if __name__ == "__main__":
-    asyncio.run(main())
+    executor.start_polling(dp, skip_updates=True)
