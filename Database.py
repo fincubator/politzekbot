@@ -13,8 +13,7 @@ class Database:
         :return: dict of statistic data
         """
         all_prisoners = sorted(self.__base.all("prisoners"),
-                               key=lambda x: len(x["fields"]["userToPrisoner"]) if "userToPrisoner" in x[
-                                   "fields"] else 0)
+                               key=lambda x: x["fields"]["friendsCount"])
 
         return {"prisoners_count": len(all_prisoners),
                 "friends_count": len(self.__base.all("users")),
@@ -30,7 +29,7 @@ class Database:
         city_base = self.__base.all("city")
         cities = {i["fields"]["city"][0] if "city" in i["fields"] else "None" for i in data}
         id_to_name = dict()
-        for i in cities:  # need refactoring
+        for i in cities:
             for j in city_base:
                 if j["id"] == i:
                     id_to_name[i] = j["fields"]["name"]

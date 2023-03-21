@@ -35,7 +35,6 @@ bot = Bot(token=config['key'])
 dp = Dispatcher(bot)
 database = Database(config["api_key"], config["base_id"])
 
-
 # main keyboard
 b1_RU = KeyboardButton(languageRU.bt_1_kw_main)
 b2_RU = KeyboardButton(languageRU.bt_2_kw_main)
@@ -80,9 +79,8 @@ currency_keybord_back = ReplyKeyboardMarkup(resize_keyboard=True)  # one_time_ke
 currency_keybord_back.add(b1_RU)
 
 
-
 @dp.message_handler(Command("start"))
-@dp.message_handler(Text('Вернись в начало \U0001F463'))
+@dp.message_handler(Text(languageRU.bt_4_kw_wal))
 @dp.message_handler(Text("🏘 Домой"))
 async def cmd_start(message: types.Message):
     kb = [
@@ -102,6 +100,7 @@ async def cmd_start(message: types.Message):
     )
 
     await message.answer(RU.RuStartPhrases, reply_markup=main_keybord, parse_mode="Markdown")
+
 
 @dp.message_handler(Command("write"))
 @dp.message_handler(Text("🏻 Что писать?"))
@@ -145,19 +144,6 @@ async def stats(message: types.Message):
                          reply_markup=keyboard, parse_mode="MarkdownV2")
 
 
-@dp.message_handler(Text(equals=languageRU.bt_4_kw_wal, ignore_case=True))
-async def lests_go(message: types.Message):
-    await bot.send_message(message.from_user.id, languageRU.go_back_to_main_menu, reply_markup=currency_keybord,
-                           parse_mode="Markdown")
-
-
-# Go back
-@dp.message_handler(Text(equals=languageRU.bt_4_kw_wal_EU, ignore_case=True))
-async def lests_go(message: types.Message):
-    await bot.send_message(message.from_user.id, languageRU.go_back_to_main_menu, reply_markup=currency_keybord,
-                           parse_mode="Markdown")
-
-
 # EU
 @dp.message_handler(Text(equals=languageRU.bt_1_kw_wal, ignore_case=True))
 async def lests_go(message: types.Message):
@@ -179,9 +165,16 @@ async def lests_go(message: types.Message):
                            parse_mode="Markdown")
 
 
+@dp.message_handler(Text(equals=languageRU.bt_4_kw_wal_EU, ignore_case=True))
+async def lests_go(message: types.Message):
+    await bot.send_message(message.from_user.id, languageRU.go_back_to_main_menu, reply_markup=currency_keybord,
+                           parse_mode="Markdown")
+
+
 @dp.message_handler(Text("🎩 Донаты"))
 async def start_pay(message: types.Message):
-    await bot.send_message(message.from_user.id, languageRU.give_us_money, reply_markup=currency_keybord,  parse_mode="Markdown")
+    await bot.send_message(message.from_user.id, languageRU.give_us_money, reply_markup=currency_keybord,
+                           parse_mode="Markdown")
 
 
 @dp.message_handler(Command("find"))
@@ -235,56 +228,56 @@ async def city(message: types.Message, state: FSMContext):
 @dp.message_handler(Text(equals=languageRU.bt_2_kw_wal_PL, ignore_case=True), state='*')
 @dp.message_handler(Text(equals=languageRU.bt_3_kw_wal_PL, ignore_case=True), state='*')
 async def buy(message: types.Message, state: FSMContext):
-    PAYMENT_TOKEN = config["patment_stripe_token"]
-    if PAYMENT_TOKEN.split(':')[1] == 'TEST':
+    payment_token = config["patment_stripe_token"]
+    if payment_token.split(':')[1] == 'TEST':
         await bot.send_message(message.chat.id, languageRU.info_for_users, reply_markup=currency_keybord_back,
                                parse_mode="Markdown")
-        PAYMENT_TOKEN = PAYMENT_TOKEN
+        payment_token = payment_token
 
     # Define image
-    PHOTO_URL = 'https://focus.ua/static/storage/originals/8/52/65cda35bcf74cf80f0f0384bdf483528.jpg'
-    MESSAGE_PAYMENT = 'Для политзаключенных 🤍❤️🤍'
+    photo_url = 'https://focus.ua/static/storage/originals/8/52/65cda35bcf74cf80f0f0384bdf483528.jpg'
+    message_payment = 'Для политзаключенных 🤍❤️🤍'
 
     # Wybór waluty
     if message.text == languageRU.bt_1_kw_wal_EU:
-        CURRENCY = languageRU.currency_EU
-        PRICE = types.LabeledPrice(label=MESSAGE_PAYMENT, amount=1000)
+        currency = languageRU.currency_EU
+        price = types.LabeledPrice(label=message_payment, amount=1000)
     elif message.text == languageRU.bt_2_kw_wal_EU:
-        CURRENCY = languageRU.currency_EU
-        PRICE = types.LabeledPrice(label=MESSAGE_PAYMENT, amount=5000)
+        currency = languageRU.currency_EU
+        price = types.LabeledPrice(label=message_payment, amount=5000)
     elif message.text == languageRU.bt_3_kw_wal_EU:
-        CURRENCY = languageRU.currency_EU
-        PRICE = types.LabeledPrice(label=MESSAGE_PAYMENT, amount=10000)
+        currency = languageRU.currency_EU
+        price = types.LabeledPrice(label=message_payment, amount=10000)
     elif message.text == languageRU.bt_1_kw_wal_US:
-        CURRENCY = languageRU.currency_US
-        PRICE = types.LabeledPrice(label=MESSAGE_PAYMENT, amount=1000)
+        currency = languageRU.currency_US
+        price = types.LabeledPrice(label=message_payment, amount=1000)
     elif message.text == languageRU.bt_2_kw_wal_US:
-        CURRENCY = languageRU.currency_US
-        PRICE = types.LabeledPrice(label=MESSAGE_PAYMENT, amount=5000)
+        currency = languageRU.currency_US
+        price = types.LabeledPrice(label=message_payment, amount=5000)
     elif message.text == languageRU.bt_3_kw_wal_US:
-        CURRENCY = languageRU.currency_US
-        PRICE = types.LabeledPrice(label=MESSAGE_PAYMENT, amount=10000)
+        currency = languageRU.currency_US
+        price = types.LabeledPrice(label=message_payment, amount=10000)
     elif message.text == languageRU.bt_1_kw_wal_PL:
-        CURRENCY = languageRU.currency_PL
-        PRICE = types.LabeledPrice(label=MESSAGE_PAYMENT, amount=1000)
+        currency = languageRU.currency_PL
+        price = types.LabeledPrice(label=message_payment, amount=1000)
     elif message.text == languageRU.bt_2_kw_wal_PL:
-        CURRENCY = languageRU.currency_PL
-        PRICE = types.LabeledPrice(label=MESSAGE_PAYMENT, amount=5000)
+        currency = languageRU.currency_PL
+        price = types.LabeledPrice(label=message_payment, amount=5000)
     elif message.text == languageRU.bt_3_kw_wal_PL:
-        CURRENCY = languageRU.currency_PL
-        PRICE = types.LabeledPrice(label=MESSAGE_PAYMENT, amount=10000)
+        currency = languageRU.currency_PL
+        price = types.LabeledPrice(label=message_payment, amount=10000)
 
     await bot.send_invoice(message.chat.id,
-                           title=MESSAGE_PAYMENT,
-                           description=MESSAGE_PAYMENT,
-                           provider_token=PAYMENT_TOKEN,
-                           currency=CURRENCY,
-                           photo_url=PHOTO_URL,
+                           title=message_payment,
+                           description=message_payment,
+                           provider_token=payment_token,
+                           currency=currency,
+                           photo_url=photo_url,
                            photo_width=512,
                            photo_height=512,
                            photo_size=512,
                            is_flexible=False,
-                           prices=[PRICE],
+                           prices=[price],
                            start_parameter='denejki',
                            payload='text_invoice_payload')
 
@@ -304,10 +297,9 @@ async def successful_payment(message: types.Message, state: FSMContext):
         print(f"{k} = {v}")
     await bot.send_message(message.from_user.id, languageRU.info_thanks, reply_markup=main_keybord,
                            parse_mode="Markdown")
-    
 
 
-###################################################### Start bot ##################################################
+# Start bot
 
 # run long polling
 if __name__ == "__main__":
