@@ -1,6 +1,7 @@
 import toml
 import logging
 import asyncio
+import config
 
 # TODO add languages choosing
 import languageRU as RU
@@ -37,6 +38,7 @@ database = Database(config["api_key"], config["base_id"])
 
 
 @dp.message_handler(Command("start"))
+@dp.message_handler(Text("🏘 Домой"))
 @dp.message_handler(Text("🏘 Домой"))
 async def cmd_start(message: types.Message):
     kb = [
@@ -170,7 +172,7 @@ async def lests_go(message: types.Message):
 
 @dp.message_handler(Text("Задонатить"))
 async def start_pay(message: types.Message):
-    await bot.send_message(message.from_user.id, languageRU.RuFirstFraze, parse_mode="Markdown")
+    await bot.send_message(message.from_user.id, languageRU.RuFirstFraze, parse_mode="Markdown", reply_markup=currency_keybord)
 
 
 @dp.message_handler(Command("find"))
@@ -214,9 +216,6 @@ async def city(message: types.Message, state: FSMContext):
     await state.set_state(Finder.input_data)
 
 
-async def main():
-    await bot.delete_webhook(drop_pending_updates=True)
-    await dp.start_polling(bot)
 
 
 @dp.message_handler(Text(equals=languageRU.bt_1_kw_wal_EU, ignore_case=True), state='*')
@@ -302,4 +301,4 @@ async def successful_payment(message: types.Message, state: FSMContext):
 
 # run long polling
 if __name__ == "__main__":
-    asyncio.run(main())
+    executor.start_polling(dp, skip_updates=True)
