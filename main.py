@@ -1,7 +1,8 @@
+import os
+
 import toml
 import logging
 import asyncio
-import config
 
 # TODO add languages choosing
 import languageRU as RU
@@ -26,13 +27,11 @@ class Finder(StatesGroup):
     input_data = State()
 
 
-with open('secrets.toml', "r") as f:
-    config = toml.loads(f.read())
-    key = config["key"]
+config = os.environ
 
 logging.basicConfig(level=logging.INFO)
 
-bot = Bot(token=key)
+bot = Bot(token=config['key'])
 dp = Dispatcher(bot)
 database = Database(config["api_key"], config["base_id"])
 
@@ -86,21 +85,21 @@ currency_keybord_back.add(b1_RU)
 @dp.message_handler(Text('Вернись в начало \U0001F463'))
 @dp.message_handler(Text("🏘 Домой"))
 async def cmd_start(message: types.Message):
-    # kb = [
-    #     [
-    #         # TODO add buttons formatting
-    #         types.KeyboardButton(text="📜 Статистика"),
-    #         types.KeyboardButton(text="🎲 Случайный"),
-    #         types.KeyboardButton(text="🏠 Города"),
-    #         types.KeyboardButton(text="🔍"),
-    #         types.KeyboardButton(text="🏻 Что писать?"),
-    #         types.KeyboardButton(text="Донаты 🎩")
-    #     ],
-    # ]
-    # keyboard = types.ReplyKeyboardMarkup(
-    #     keyboard=kb,
-    #     resize_keyboard=True,
-    # )
+    kb = [
+        [
+            # TODO add buttons formatting
+            types.KeyboardButton(text="📜 Статистика"),
+            types.KeyboardButton(text="🎲 Случайный"),
+            types.KeyboardButton(text="🏠 Города"),
+            types.KeyboardButton(text="🔍"),
+            types.KeyboardButton(text="🏻 Что писать?"),
+            types.KeyboardButton(text="Донаты 🎩")
+        ],
+    ]
+    keyboard = types.ReplyKeyboardMarkup(
+        keyboard=kb,
+        resize_keyboard=True,
+    )
 
     await message.answer(RU.RuStartPhrases, reply_markup=main_keybord, parse_mode="Markdown")
 
@@ -224,11 +223,6 @@ async def city(message: types.Message, state: FSMContext):
         reply_markup=keyboard
     )
     await state.set_state(Finder.input_data)
-
-
-async def main():
-    await bot.delete_webhook(drop_pending_updates=True)
-    await dp.start_polling(bot)
 
 
 @dp.message_handler(Text(equals=languageRU.bt_1_kw_wal_EU, ignore_case=True), state='*')
