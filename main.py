@@ -1,4 +1,6 @@
 import os
+import re
+from datetime import datetime
 
 import toml
 import logging
@@ -20,7 +22,7 @@ from aiogram.types.message import ContentType
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove, InlineKeyboardButton, WebAppInfo, \
     InlineKeyboardMarkup
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
-from aiogram.dispatcher.filters import Text, Command
+from aiogram.dispatcher.filters import Text, Command, RegexpCommandsFilter
 
 
 class Finder(StatesGroup):
@@ -138,10 +140,63 @@ async def stats(message: types.Message):
     answer = database.statistic()
     await message.answer(RU.RUStats.format(answer["prisoners_count"], answer["friends_count"], answer["tasks"],
                                            *[
-                                               f"{len(i['fields']['userToPrisoner']) if 'userToPrisoner' in i['fields'] else 0} друзей {i['fields']['name']} /info@{i['fields']['shortName']}"
+                                               f"{i['fields']['friendsCount'] if 'userToPrisoner' in i['fields'] else 0} друзей {i['fields']['name']} /info\_{i['fields']['shortName']}"
                                                for i in
                                                answer["less_friends"]]),
                          reply_markup=keyboard, parse_mode="MarkdownV2")
+
+
+@dp.message_handler(RegexpCommandsFilter(regexp_commands=['info_(.*)']))
+async def info(message: types.Message):
+    kb = [
+        [
+            types.KeyboardButton(text="🏘 Домой")
+
+        ],
+    ]
+    keyboard = types.ReplyKeyboardMarkup(
+        keyboard=kb,
+        resize_keyboard=True,
+    )
+    await message.answer(languageRU.RUWaitCommon, reply_markup=keyboard)
+    user = database.get_page(message.text.split('_')[-1])
+    if 'imprisonPeriodsEnd' in user['fields'] or 'imprisonPeriodsStart' not in user['fields']:
+        prison_time = languageRU.NotIn
+    else:
+        time = datetime.now() - datetime.strptime(user['fields']['imprisonPeriodsStart'][-1], "%Y-%m-%d")
+        years = time.days // 365
+        months = time.days % 365 // 30
+        days = time.days % 365 % 30
+        prison_time = ''
+        if years:
+            prison_time += str(years) + languageRU.YearsShort
+        if months:
+            prison_time += str(months) + languageRU.MonthShort
+        if days:
+            prison_time += str(days) + languageRU.DaysShort
+
+    start = user['fields']['imprisonPeriodsStart'][-1] if 'imprisonPeriodsStart' in user[
+        'fields'] else languageRU.DontKnow
+    facts = user['fields']['facts'] if 'facts' in user['fields'] else languageRU.DontKnow
+    tasks = len(user['fields']['taskToPrisoner']) if 'taskToPrisoner' in user['fields'] else 0
+    friends = str(user['fields']['friendsCount']) + ' ' + languageRU.friendsPostfix[
+        int(str(user['fields']['friendsCount'])[-1])
+    ]
+    tasks_full = str(tasks) + ' ' + languageRU.tasksPostfix[
+        int(str(tasks)[-1])
+    ]
+    await message.answer(languageRU.RuInfo.format(name=user['fields']['name'],
+                                                  prison_time=prison_time,
+                                                  address=user['fields']['prison'][0],
+                                                  time=start,
+                                                  charge=user['fields']['charge'],
+                                                  more=facts,
+                                                  friends=friends,
+                                                  tasks=tasks_full,
+                                                  nick=user['fields']['shortName']
+                                                  ).replace('-', '\-').replace('.', '\.').replace('(', '\(').replace(
+        ')', '\)'),
+        reply_markup=keyboard, parse_mode="MarkdownV2")
 
 
 # EU

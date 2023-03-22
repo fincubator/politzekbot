@@ -59,7 +59,7 @@ class Database:
     def get_page(self, nick):
         data = self.__base.all("prisoners")
         for i in data:
-            if "shortName" in data[i]["fields"] and nick in data[i]["fields"]["shortName"]:
+            if "shortName" in i["fields"] and nick in i["fields"]["shortName"]:
                 return i
 
 
@@ -68,4 +68,4 @@ if __name__ == "__main__":
 
     config = toml.load("secrets.toml")
     db = Database(config["api_key"], config["base_id"])
-    print(db.statistic())
+    print(db.get_page('splonis')['fields']['name'])
