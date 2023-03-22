@@ -89,7 +89,7 @@ async def cmd_start(message: types.Message):
         [
             # TODO add buttons formatting
             types.KeyboardButton(text="📜 Статистика"),
-            types.KeyboardButton(text="🎲 Случайный"),
+            types.KeyboardButton(text=languageRU.ButtonRandom),
             types.KeyboardButton(text="🏠 Города"),
             types.KeyboardButton(text="🔍"),
             types.KeyboardButton(text="🏻 Что писать?"),
@@ -199,6 +199,13 @@ async def info(message: types.Message):
         reply_markup=keyboard, parse_mode="MarkdownV2")
 
 
+@dp.message_handler(Command("random"))
+@dp.message_handler(Text(equals=languageRU.ButtonRandom))
+async def random_choose(message: types.Message):
+    random = database.get_random_prisoner()
+    message.text = "/info_"+random['fields']['shortName']
+    await info(message)
+
 # EU
 @dp.message_handler(Text(equals=languageRU.bt_1_kw_wal, ignore_case=True))
 async def lests_go(message: types.Message):
@@ -250,6 +257,8 @@ async def find(message: types.Message, state: FSMContext):
         reply_markup=keyboard
     )
     await state.set_state(Finder.input_data)
+
+
 
 
 @dp.message_handler(Command("city"))

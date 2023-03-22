@@ -169,3 +169,5 @@ NotIn = 'Не находится '
 YearsShort = "г. "
 MonthShort = 'м. '
 DaysShort = "д. "
+
+ButtonRandom = "🎲 Случайный"
