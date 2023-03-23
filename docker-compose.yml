@@ -1,0 +1,12 @@
+version: "3"
+services:
+  politzekbot:
+    image: kaedone/politzekbot:latest
+    container_name: politzekbot
+    volumes:
+      - ./secrets:/opt/secrets
+  watchtower:
+    image: containrrr/watchtower
+    container_name: watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock

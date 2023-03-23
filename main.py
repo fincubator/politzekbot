@@ -28,8 +28,7 @@ from aiogram.dispatcher.filters import Text, Command, RegexpCommandsFilter
 class Finder(StatesGroup):
     input_data = State()
 
-
-config = os.environ
+config = toml.load("secrets.toml")
 
 logging.basicConfig(level=logging.INFO)
 
